@@ -36,4 +36,4 @@ The $PSScriptRoot automatic variable expands to the path of the install script i
 . '\\forum1\dsl$\printers\Powershell_Printer_Deployment\Install-IPPrinter.ps1'
 
 #call printer install function
-Install-IPPrinter @installparms
+Install-IPPrinter @installparms >> "$env:systemdrive\temp\$($installparms.printername).txt"
