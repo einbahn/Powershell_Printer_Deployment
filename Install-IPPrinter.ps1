@@ -50,6 +50,7 @@ function Install-IPPrinter {
     AddIPPort
     SetIPPrinter
   } else {
+    write-output "Installing Printer..."
     AddIPPort
     AddIPPrinter
     }
