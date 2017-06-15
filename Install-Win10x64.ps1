@@ -21,7 +21,7 @@ The $PSScriptRoot automatic variable expands to the path of the install script i
 $ErrorActionPreference='SilentlyContinue'
 Stop-Transcript | Out-Null
 $ErrorActionPreference='Continue'
-Start-Transcript -path $env:systemdrive\temp\printer_installs.log -append
+Start-Transcript -path "$env:systemdrive\temp\printer_installs.log" -append
 
 #Define Variables
 

@@ -20,12 +20,7 @@ function Install-IPPrinter {
     )
         function AddIPPort 
         { 
-            try{
-            Add-PrinterPort -name $PortName -PrinterHostAddress $PrinterHostAddress -PortNumber $PortNumber -verbose -ea Continue}
-            catch[Microsoft.Management.Infrastructure.CimException] {
-                write-verbose "$($_.exception)" -verbose
-            }
-            
+            Add-PrinterPort -name $PortName -PrinterHostAddress $PrinterHostAddress -PortNumber $PortNumber -verbose -ea continue
         }
 
         function AddIPPrinter 
@@ -41,15 +36,14 @@ function Install-IPPrinter {
 
         #import driver into the driver store
         if (Get-PrinterDriver -Name $DriverName) {
-            Write-Output  "Driver `"$DriverName`" already exists in the driver store."
-                
+            Write-Output  "Driver `"$DriverName`" already exists in the driver store."     
         }
         else {
             Start-Process -FilePath "$ENV:SystemRoot\system32\pnputil.exe" -ArgumentList "/add-driver $InfPath" -wait -nonewwindow
             Add-PrinterDriver -name $DriverName -verbose
         } 
 
-  if (get-printer -name $printername -ea SilentlyContinue)
+  if (get-printer -name $printername)
   {
     write-output "Target printer already exists - updating printer setting"
     AddIPPort
