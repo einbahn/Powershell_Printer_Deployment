@@ -20,7 +20,12 @@ function Install-IPPrinter {
     )
         function AddIPPort 
         { 
-            Add-PrinterPort -name $PortName -PrinterHostAddress $PrinterHostAddress -PortNumber $PortNumber -verbose -ea Continue
+            try{
+            Add-PrinterPort -name $PortName -PrinterHostAddress $PrinterHostAddress -PortNumber $PortNumber -verbose -ea Continue}
+            catch[Microsoft.Management.Infrastructure.CimException] {
+                write-verbose "$($_.exception)" -verbose
+            }
+            
         }
 
         function AddIPPrinter 
