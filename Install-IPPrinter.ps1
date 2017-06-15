@@ -44,7 +44,7 @@ function Install-IPPrinter {
             Add-PrinterDriver -name $DriverName -verbose
         } 
 
-  if ($get-printer -name $printername -ea SilentlyContinue)
+  if (get-printer -name $printername -ea SilentlyContinue)
   {
     AddIPPort
     SetIPPrinter
