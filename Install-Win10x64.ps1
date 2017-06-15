@@ -17,7 +17,14 @@ Input printer installation parameters below, retaining all quotations marks as i
 The $PSScriptRoot automatic variable expands to the path of the install script itself. The driver folder and .inf file is relative to this value. 
 #>
 
-#define variables
+#set up logging
+$ErrorActionPreference='SilentlyContinue'
+Stop-Transcript | Out-Null
+$ErrorActionPreference='Continue'
+Start-Transcript -path $env:systemdrive\temp\printer_installs.log -append
+
+#Define Variables
+
 [hashtable]$installparms = 
 
     @{
@@ -33,7 +40,11 @@ The $PSScriptRoot automatic variable expands to the path of the install script i
     }
 
 #dot-source the printer install function
+
 . '\\forum1\dsl$\printers\Powershell_Printer_Deployment\Install-IPPrinter.ps1'
 
 #call printer install function
-Install-IPPrinter @installparms >> "$env:systemdrive\temp\$($installparms.printername).txt"
+Install-IPPrinter @installparms
+
+#stop logging
+Stop-Transcript
