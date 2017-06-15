@@ -45,11 +45,11 @@ function Install-IPPrinter {
 
   if (get-printer -name $printername)
   {
-    write-output "Target printer already exists - updating printer setting"
+    write-verbose "Target printer already exists - updating printer settings..." -verbose
     AddIPPort
     SetIPPrinter
   } else {
-    write-output "Installing Printer..."
+    write-verbose "Installing Printer..." -verbose
     AddIPPort
     AddIPPrinter
     }
