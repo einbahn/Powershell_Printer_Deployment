@@ -43,11 +43,9 @@ function Install-IPPrinter {
             Start-Process -FilePath "$ENV:SystemRoot\system32\pnputil.exe" -ArgumentList "/add-driver $InfPath" -wait -nonewwindow
             Add-PrinterDriver -name $DriverName -verbose
         } 
-   
 
-  $targetprinter = get-printer -name $printername -ea SilentlyContinue
-
-  if ($targetprinter) {
+  if ($get-printer -name $printername -ea SilentlyContinue)
+  {
     AddIPPort
     SetIPPrinter
   } else {
@@ -55,77 +53,4 @@ function Install-IPPrinter {
     AddIPPrinter
     }
 }
-
-
-
-
-<#  if (!$targetprinter) 
-     {
-        if (!$targetport) 
-        {
-          write-output "no printer no port"
-          AddIPPort
-          AddIPPrinter
-          else 
-          {
-          write-output "no printer yes port"
-            AddIPPrinter
-          }  
-          else {
-            if (!$targetport) 
-              {
-                write-output "yes printer no port"
-                AddIPPort
-                SetIPPrinter
-              } else 
-                {
-                write-output "yes printer yes port"
-                SetIPPrinter
-                }
-            } 
-        }  
-      }
-        
-}#>
-
-
-  <#
-    if ($targetprinter -and ($targetprinter.portname -eq $targetport))
-    {write-output "Printer already exists with right port."}
-    elseif ($targetprinter -and ($targetprinter.portname -ne $portname)) {
-      write-output "$($targetprinter).name exists but with a different port."
-      AddIPPort
-      SetIPPrinter
-    }
-    elseif (!$targetprinter -and $targetport) {
-      write-output "Target printer not found but port already exists."
-      AddIPPrinter
-    }
-    elseif (!$targetprinter -and !$targetport) {
-      write-output "Neither printer nor port found."
-      AddIPPort
-      AddIPPrinter
-      }
-
-       
-    }
-      <#  switch (get-printer) {
-            {$_.name -eq $PrinterName -and $_.PortName -eq $PortName} {
-                Write-Output "`"$($_.name)`" is already installed."
-                break
-            }
-            {$_.name -eq $PrinterName} {
-                Write-Output "`"$($_.name)`" exists but with different parameters."
-                AddIPPort
-                SetIPPrinter
-                break
-            }
-            default {
-                Write-Output "Proceeding with printer installation."
-                AddIPPort
-                AddIPPrinter
-                break
-            }
-        }#>
-   
 
