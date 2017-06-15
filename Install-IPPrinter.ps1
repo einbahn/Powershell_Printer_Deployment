@@ -46,6 +46,7 @@ function Install-IPPrinter {
 
   if (get-printer -name $printername -ea SilentlyContinue)
   {
+    write-output "Target printer already exists - updating printer setting"
     AddIPPort
     SetIPPrinter
   } else {
