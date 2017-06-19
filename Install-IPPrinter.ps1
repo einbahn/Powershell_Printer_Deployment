@@ -37,8 +37,7 @@ function Install-IPPrinter {
         #import driver into the driver store
         if (Get-PrinterDriver -Name $DriverName) {
             Write-Output  "Driver `"$DriverName`" already exists in the driver store."     
-        }
-        else {
+        } else {
             $pnputilpath = resolve-path c:\windows\winsxs\amd64_microsoft-windows-pnputil_*\ | join-path -childpath pnputil.exe
             Start-Process -FilePath $pnputilpath -ArgumentList "/add-driver $InfPath" -wait -nonewwindow
             Add-PrinterDriver -name $DriverName -verbose
