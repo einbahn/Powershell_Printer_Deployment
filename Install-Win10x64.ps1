@@ -37,6 +37,9 @@ Start-Transcript -path "$env:systemdrive\temp\printer_installs.log" -append
     Location            = '246 Bloor, 6th Floor'
 
     InfPath             = "$PSScriptRoot\PCL6-WIN7x64\OEMSETUP.inf"
+
+    Comment             = 'Ricoh Printer in Kitchen'
+
     }
 
 #dot-source the printer install function

@@ -31,7 +31,7 @@ function Install-IPPrinter {
 
         function SetIPPrinter 
         {
-            Set-Printer -Name $PrinterName -PortName $PortName -Location $Location -DriverName $DriverName -verbose -ea continue
+            Set-Printer -Name $PrinterName -PortName $PortName -Location $Location -DriverName $DriverName -comment $comment -verbose -ea continue
         }
 
         #import driver into the driver store
