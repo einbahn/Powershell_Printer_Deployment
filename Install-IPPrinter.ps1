@@ -20,18 +20,18 @@ function Install-IPPrinter {
     )
         function AddIPPort 
         { 
-            Add-PrinterPort -name $PortName -PrinterHostAddress $PrinterHostAddress -PortNumber $PortNumber -verbose -ea continue
+            Add-PrinterPort -name $PortName -PrinterHostAddress $PrinterHostAddress -PortNumber $PortNumber -verbose 
         }
 
         function AddIPPrinter 
         {
             Add-Printer -name $PrinterName -DriverName $DriverName -Location `
-            $Location -PortName $PortName -Comment $Comment -verbose -ea continue
+            $Location -PortName $PortName -Comment $Comment -verbose 
         }
 
         function SetIPPrinter 
         {
-            Set-Printer -Name $PrinterName -PortName $PortName -Location $Location -DriverName $DriverName -comment $comment -verbose -ea continue
+            Set-Printer -Name $PrinterName -PortName $PortName -Location $Location -DriverName $DriverName -comment $comment -verbose 
         }
 
         #import driver into the driver store
