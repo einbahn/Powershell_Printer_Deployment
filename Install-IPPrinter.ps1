@@ -43,12 +43,11 @@ function Install-IPPrinter {
             Add-PrinterDriver -name $DriverName -verbose
         } 
 
-  if (get-printer -name $printername)
-  {
+  if (get-printer -name $printername) {
     write-verbose "Target printer already exists - updating printer settings..." -verbose
     AddIPPort
     SetIPPrinter
-  } else {
+    } else {
     write-verbose "Installing Printer..." -verbose
     AddIPPort
     AddIPPrinter
