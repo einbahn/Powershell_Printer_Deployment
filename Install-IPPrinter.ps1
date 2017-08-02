@@ -18,39 +18,38 @@ function Install-IPPrinter {
         [string]$InfPath,
         [string]$Comment
     )
-        function AddIPPort 
-        { 
-            Add-PrinterPort -name $PortName -PrinterHostAddress $PrinterHostAddress -PortNumber $PortNumber -verbose 
-        }
+    function AddIPPort { 
+        Add-PrinterPort -name $PortName -PrinterHostAddress $PrinterHostAddress -PortNumber $PortNumber -verbose 
+    }
 
-        function AddIPPrinter 
-        {
-            Add-Printer -name $PrinterName -DriverName $DriverName -Location `
+    function AddIPPrinter {
+        Add-Printer -name $PrinterName -DriverName $DriverName -Location `
             $Location -PortName $PortName -Comment $Comment -verbose 
-        }
+    }
 
-        function SetIPPrinter 
-        {
-            Set-Printer -Name $PrinterName -PortName $PortName -Location $Location -DriverName $DriverName -comment $comment -verbose 
-        }
+    function SetIPPrinter {
+        Set-Printer -Name $PrinterName -PortName $PortName -Location $Location -DriverName $DriverName -comment $comment -verbose 
+    }
 
-        #import driver into the driver store
-        if (Get-PrinterDriver -Name $DriverName) {
-            Write-Verbose  "Driver `"$DriverName`" already exists in the driver store." -Verbose
-        } else {
-            $pnputilpath = resolve-path c:\windows\winsxs\amd64_microsoft-windows-pnputil_*\ | join-path -childpath pnputil.exe
-            Start-Process -FilePath $pnputilpath -ArgumentList "/add-driver $InfPath" -wait -nonewwindow
-            Add-PrinterDriver -name $DriverName -verbose
-        } 
+    #import driver into the driver store
+    if (Get-PrinterDriver -Name $DriverName) {
+        Write-Verbose  "Driver `"$DriverName`" already exists in the driver store." -Verbose
+    }
+    else {
+        $PnPUtilPath = resolve-path c:\windows\winsxs\amd64_microsoft-windows-pnputil_*\ | join-path -childpath pnputil.exe
+        Start-Process -FilePath $PnPUtilPath -ArgumentList "/add-driver $InfPath" -wait -nonewwindow
+        Add-PrinterDriver -name $DriverName -verbose
+    } 
 
-  if (get-printer -name $printername) {
-    write-verbose "Target printer already exists - updating printer settings..." -verbose
-    AddIPPort
-    SetIPPrinter
-    } else {
-    write-verbose "Installing Printer..." -verbose
-    AddIPPort
-    AddIPPrinter
+    if (get-printer -name $printername) {
+        write-verbose "Target printer already exists - updating printer settings..." -verbose
+        AddIPPort
+        SetIPPrinter
+    }
+    else {
+        write-verbose "Installing Printer..." -verbose
+        AddIPPort
+        AddIPPrinter
     }
 }
 
