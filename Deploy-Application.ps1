@@ -45,7 +45,15 @@ Param (
     [Parameter(Mandatory = $false)]
     [switch]$TerminalServerMode = $false,
     [Parameter(Mandatory = $false)]
-    [switch]$DisableLogging = $false
+    [switch]$DisableLogging = $false,  
+    [string]$PrinterName = 'UTC_167_COL_2_HP_LJ_M401n_1 (UTORcsi)',
+    [string]$PrinterHostAddress = '128.100.252.71',
+    [string]$PortName = "IP_$PrinterHostAddress",
+    [string]$DriverName = 'HP Universal Printing PCL 6',
+    [string]$Location = '167 College, 2nd Floor',
+    [string]$PortNumber = '9100',
+    [string]$InfPath = "$dirFiles\hpcu196u.inf",
+    [string]$Comment = 'HP LaserJet M401n'
 )
 
 Try {
@@ -57,7 +65,7 @@ Try {
     ##*===============================================
     ## Variables: Application
     [string]$appVendor = 'UTORCSI Printer Deployment'
-    [string]$appName = 'UTC_167_COL_2_HP_LJ_M401n_1'
+    [string]$appName = "$Printername"
     [string]$appVersion = ''
     [string]$appArch = ''
     [string]$appLang = 'EN'
@@ -65,14 +73,6 @@ Try {
     [string]$appScriptVersion = '1.0.0'
     [string]$appScriptDate = '08/07/2017'
     [string]$appScriptAuthor = 'Derek liu'
-    [string]$PrinterName = 'UTC_167_COL_2_HP_LJ_M401n_1 (UTORcsi)'
-    [string]$PrinterHostAddress = '128.100.252.71'
-    [string]$PortName = "IP_$PrinterHostAddress"
-    [string]$DriverName = 'HP Universal Printing PCL 6'
-    [string]$Location = '167 College, 2nd Floor'
-    [string]$PortNumber = '9100'
-    [string]$InfPath = "$dirFiles\hpcu196u.inf"
-    [string]$Comment = 'HP LaserJet M401n'
     ##*===============================================
     ## Variables: Install Titles (Only set here to override defaults set by the toolkit)
     [string]$installName = ''
@@ -122,10 +122,17 @@ Try {
         ## Show Welcome Message, close Internet Explorer if required, allow up to 3 deferrals, verify there is enough disk space to complete the install, and persist the prompt
         <# Show-InstallationWelcome -CloseApps 'iexplore' -AllowDefer -DeferTimes 3 -CheckDiskSpace -PersistPrompt #>
 		
+        
+        ## <Perform Pre-Installation tasks here>
+        $targetprinter = get-printer $printername -ErrorAction SilentlyContinue
+        if ($targetprinter.portname -eq $portname) {
+            write-log -message "The target printer is already installed on this system." -severity 2 -source $deployAppScriptFriendlyName
+            exit-script -ExitCode 0 
+        }
+
         ## Show Progress Message (with the default message)
         Show-InstallationProgress
 		
-        ## <Perform Pre-Installation tasks here>
         function AddIPPort { 
             Add-PrinterPort -name $PortName -PrinterHostAddress $PrinterHostAddress -PortNumber $PortNumber -verbose 
         }
@@ -140,11 +147,12 @@ Try {
         }
 
         #import driver into the driver store
-        if (Get-PrinterDriver -Name $DriverName) {
-            Write-Log  -message "Driver `"$DriverName`" already exists in the driver store." -severitylevel 1 -Source $deployAppScriptFriendlyName
+        if (Get-PrinterDriver -Name $DriverName -ErrorAction silentlycontinue) {
+            Write-Log  -message "Driver `"$DriverName`" already exists in the driver store." -severity 1 -Source $deployAppScriptFriendlyName
         }
         else {
-            execute-process -path "$envWindir\system32\pnputil.exe" -Parameters "/add-driver $InfPath" -workingdirectory $InfPath
+            $pnputilpath = resolve-path $env:windir\winsxs\amd64_microsoft-windows-pnputil_* | join-path -ChildPath pnputil.exe
+            execute-process -path $pnputilpath -Parameters "/add-driver $infpath"
             Add-PrinterDriver -name $DriverName -verbose
         } 
 		
@@ -160,16 +168,18 @@ Try {
         }
 		
         ## <Perform Installation tasks here>
-        if (get-printer -name $printername) {
-			write-log -message "Target printer already exists - updating printer settings..." -severitylevel 1 `
-			-Source $deployAppScriptFriendlyName
+        if ($targetprinter) {
+			write-log -message "Target printer already exists - updating printer settings..." -severity 1 `
+            -Source $deployAppScriptFriendlyName
+            Show-InstallationPrompt -Message "The printer $printername settings have been updated." -ButtonRightText 'OK' -Icon Information -NoWait
             AddIPPort
             SetIPPrinter
         }
         else {
-            write-log -message "Installing Printer..." -severitylevel 1 -Source $deployAppScriptFriendlyName
+            write-log -message "Installing Printer..." -severity 1 -Source $deployAppScriptFriendlyName
             AddIPPort
             AddIPPrinter
+            Show-InstallationPrompt -Message "The printer $printername has been installed on your machine." -ButtonRightText 'OK' -Icon Information -NoWait
         }
 		
         ##*===============================================
@@ -180,7 +190,7 @@ Try {
         ## <Perform Post-Installation tasks here>
 		
         ## Display a message at the end of the install
-        If (-not $useDefaultMsi) { Show-InstallationPrompt -Message 'You can customize text to appear at the end of an install or remove it completely for unattended installations.' -ButtonRightText 'OK' -Icon Information -NoWait }
+        If (-not $useDefaultMsi) { }
     }
     ElseIf ($deploymentType -ieq 'Uninstall') {
         ##*===============================================
@@ -189,13 +199,13 @@ Try {
         [string]$installPhase = 'Pre-Uninstallation'
 		
         ## Show Welcome Message, close Internet Explorer with a 60 second countdown before automatically closing
-        Show-InstallationWelcome -CloseApps 'iexplore' -CloseAppsCountdown 60
+        <# Show-InstallationWelcome -CloseApps 'iexplore' -CloseAppsCountdown 60 #>
 		
         ## Show Progress Message (with the default message)
         Show-InstallationProgress
 		
         ## <Perform Pre-Uninstallation tasks here>
-		
+        
 		
         ##*===============================================
         ##* UNINSTALLATION
@@ -209,7 +219,7 @@ Try {
         }
 		
         # <Perform Uninstallation tasks here>
-		
+		Remove-Printer -Name $printername
 		
         ##*===============================================
         ##* POST-UNINSTALLATION
