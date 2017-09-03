@@ -39,7 +39,7 @@ Param (
     [string]$DeploymentType = 'Install',
     [Parameter(Mandatory = $false)]
     [ValidateSet('Interactive', 'Silent', 'NonInteractive')]
-    [string]$DeployMode = 'Interactive',
+    [string]$DeployMode = 'Silent',
     [Parameter(Mandatory = $false)]
     [switch]$AllowRebootPassThru = $false,
     [Parameter(Mandatory = $false)]
@@ -124,28 +124,6 @@ Try {
 		
         
         ## <Perform Pre-Installation tasks here>
-        $targetprinter = get-printer $printername -ErrorAction SilentlyContinue
-        if ($targetprinter.portname -eq $portname) {
-            write-log -message "The target printer is already installed on this system." -severity 2 -source $deployAppScriptFriendlyName
-            exit-script -ExitCode 0 
-        }
-
-        ## Show Progress Message (with the default message)
-        Show-InstallationProgress
-		
-        function AddIPPort { 
-            Add-PrinterPort -name $PortName -PrinterHostAddress $PrinterHostAddress -PortNumber $PortNumber -verbose 
-        }
-
-        function AddIPPrinter {
-            Add-Printer -name $PrinterName -DriverName $DriverName -Location `
-                $Location -PortName $PortName -Comment $Comment -verbose 
-        }
-
-        function SetIPPrinter {
-            Set-Printer -Name $PrinterName -PortName $PortName -Location $Location -DriverName $DriverName -comment $comment -verbose 
-        }
-
         #import driver into the driver store
         if (Get-PrinterDriver -Name $DriverName -ErrorAction silentlycontinue) {
             Write-Log  -message "Driver `"$DriverName`" already exists in the driver store." -severity 1 -Source $deployAppScriptFriendlyName
@@ -155,31 +133,39 @@ Try {
             execute-process -path $pnputilpath -Parameters "/add-driver $infpath"
             Add-PrinterDriver -name $DriverName -verbose
         } 
-		
+       
+        function AddIPPort { 
+            $targetPort = Get-PrinterPort | Where-Object {$_.PortName -eq $PortName}
+            if ($targetPort) {
+                Write-Log -Message "Target port already exists on this computer" -Severity 1 -Source $deployAppScriptFriendlyName
+            }
+            else {
+                Add-PrinterPort -name $PortName -PrinterHostAddress $PrinterHostAddress -PortNumber $PortNumber -verbose 
+            }
+        }
+        function AddIPPrinter {
+            Add-Printer -name $PrinterName -DriverName $DriverName -Location $Location -PortName $PortName -Comment $Comment -verbose 
+        }
+        function SetIPPrinter {
+            Set-Printer -Name $PrinterName -PortName $PortName -Location $Location -DriverName $DriverName -comment $comment -verbose 
+        }
+
         ##*===============================================
         ##* INSTALLATION 
         ##*===============================================
         [string]$installPhase = 'Installation'
 		
-        ## Handle Zero-Config MSI Installations
-        If ($useDefaultMsi) {
-            [hashtable]$ExecuteDefaultMSISplat = @{ Action = 'Install'; Path = $defaultMsiFile }; If ($defaultMstFile) { $ExecuteDefaultMSISplat.Add('Transform', $defaultMstFile) }
-            Execute-MSI @ExecuteDefaultMSISplat; If ($defaultMspFiles) { $defaultMspFiles | ForEach-Object { Execute-MSI -Action 'Patch' -Path $_ } }
-        }
-		
         ## <Perform Installation tasks here>
+        $TargetPrinter = Get-Printer -Name $PrinterName -ErrorAction SilentlyContinue
         if ($targetprinter) {
-			write-log -message "Target printer already exists - updating printer settings..." -severity 1 `
-            -Source $deployAppScriptFriendlyName
-            Show-InstallationPrompt -Message "The printer $printername settings have been updated." -ButtonRightText 'OK' -Icon Information -NoWait
+            write-log -message "Printer with same name already exists, updating printer settings..." -severity 1 -Source $deployAppScriptFriendlyName
             AddIPPort
             SetIPPrinter
         }
         else {
             write-log -message "Installing Printer..." -severity 1 -Source $deployAppScriptFriendlyName
             AddIPPort
-            AddIPPrinter
-            Show-InstallationPrompt -Message "The printer $printername has been installed on your machine." -ButtonRightText 'OK' -Icon Information -NoWait
+            AddIPPrinter 
         }
 		
         ##*===============================================
@@ -188,9 +174,16 @@ Try {
         [string]$installPhase = 'Post-Installation'
 		
         ## <Perform Post-Installation tasks here>
-		
-        ## Display a message at the end of the install
-        If (-not $useDefaultMsi) { }
+        Try {
+            $TargetPrinter = Get-Printer | Where-Object {$_.Name -eq $PrinterName -and $_.PortName -eq $PortName}
+            if (-not $TargetPrinter) {throw "Printer installation / configuration failed."}
+        }
+        Catch {
+            If ($mainExitCode -eq 0) { [int32]$mainExitCode = 70000 }
+            Write-Error -Message "Module $PrinterName failed to install: `n$($_.Exception.Message)`n `n$($_.InvocationInfo.PositionMessage)" -ErrorAction 'Continue'
+            ## Exit the script, returning the exit code to SCCM
+            If (Test-Path -LiteralPath 'variable:HostInvocation') { $script:ExitCode = $mainExitCode; Exit } Else { Exit $mainExitCode }
+        }
     }
     ElseIf ($deploymentType -ieq 'Uninstall') {
         ##*===============================================
@@ -219,7 +212,7 @@ Try {
         }
 		
         # <Perform Uninstallation tasks here>
-		Remove-Printer -Name $printername
+        Remove-Printer -Name $printername
 		
         ##*===============================================
         ##* POST-UNINSTALLATION
