@@ -45,15 +45,7 @@ Param (
     [Parameter(Mandatory = $false)]
     [switch]$TerminalServerMode = $false,
     [Parameter(Mandatory = $false)]
-    [switch]$DisableLogging = $false,  
-    [string]$PrinterName = 'UTC_167_COL_2_HP_LJ_M401n_1 (UTORcsi)',
-    [string]$PrinterHostAddress = '128.100.252.71',
-    [string]$PortName = "IP_$PrinterHostAddress",
-    [string]$DriverName = 'HP Universal Printing PCL 6',
-    [string]$Location = '167 College, 2nd Floor',
-    [string]$PortNumber = '9100',
-    [string]$InfPath = "$dirFiles\hpcu196u.inf",
-    [string]$Comment = 'HP LaserJet M401n'
+    [switch]$DisableLogging = $false
 )
 
 Try {
@@ -85,7 +77,7 @@ Try {
     [int32]$mainExitCode = 0
 	
     ## Variables: Script
-    [string]$deployAppScriptFriendlyName = 'Deploy Application'
+    [string]$deployAppScriptFriendlyName = 'Deploy Printer'
     [version]$deployAppScriptVersion = [version]'3.6.9'
     [string]$deployAppScriptDate = '02/12/2017'
     [hashtable]$deployAppScriptParameters = $psBoundParameters
@@ -112,6 +104,16 @@ Try {
     ##*===============================================
     ##* END VARIABLE DECLARATION
     ##*===============================================
+
+    #DECLARE PRINTER VARIABLES
+    [string]$PrinterName = 'UTC_167_COL_2_HP_LJ_M401n_1 (UTORcsi)'
+    [string]$PrinterHostAddress = '128.100.252.71'
+    [string]$PortName = "IP_$PrinterHostAddress"
+    [string]$DriverName = 'HP Universal Printing PCL 6'
+    [string]$Location = '167 College, 2nd Floor'
+    [string]$PortNumber = '9100'
+    [string]$InfPath = "$dirFiles\hpcu196u.inf"
+    [string]$Comment = 'HP LaserJet M401n'
 		
     If ($deploymentType -ine 'Uninstall') {
         ##*===============================================
