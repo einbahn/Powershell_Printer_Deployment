@@ -109,13 +109,12 @@ Try {
         ## <Perform Pre-Installation tasks here>
         #import driver into the driver store
 
-        
         if (Get-PrinterDriver -Name $DriverName -ErrorAction silentlycontinue) {
             Write-Log  -message "Driver `"$DriverName`" already exists in the driver store." -severity 1 -Source $deployAppScriptFriendlyName
         }
         else {
-            $pnputilpath = resolve-path $env:windir\winsxs\amd64_microsoft-windows-pnputil_* | join-path -ChildPath pnputil.exe
-            execute-process -path $pnputilpath -Parameters "/add-driver $infpath" -WindowStyle 'Hidden'
+            execute-process -path (resolve-path $env:windir\winsxs\amd64_microsoft-windows-pnputil_* | join-path -ChildPath "pnputil.exe") `
+            -Parameters "/add-driver $infpath" -WindowStyle 'Hidden'
             Add-PrinterDriver -name $DriverName -verbose
         } 
        
