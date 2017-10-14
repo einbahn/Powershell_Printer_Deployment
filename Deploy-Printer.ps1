@@ -40,6 +40,16 @@ Try {
     ##*===============================================
     ##* VARIABLE DECLARATION
     ##*===============================================
+    ## Variables: Printer
+    [string]$PrinterName = 'UTC_167_COL_2_HP_LJ_M401n_1 (UTORcsi)'
+    [string]$PrinterHostAddress = '128.100.252.84'
+    [string]$PortName = "IP_$PrinterHostAddress"
+    [string]$DriverName = 'HP Universal Printing PCL 6'
+    [string]$Location = '167 College, 2nd Floor'
+    [string]$PortNumber = '9100'
+    [string]$InfPath = "$dirFiles\hpcu196u.inf"
+    [string]$Comment = 'HP LaserJet M401n'
+
     ## Variables: Application
     [string]$appVendor = 'UTORCSI Printer Deployment'
     [string]$appName = "$Printername"
@@ -90,16 +100,6 @@ Try {
     ##* END VARIABLE DECLARATION
     ##*===============================================
 
-    #DECLARE PRINTER VARIABLES
-    [string]$PrinterName = 'UTC_167_COL_2_HP_LJ_M401n_1 (UTORcsi)'
-    [string]$PrinterHostAddress = '128.100.252.71'
-    [string]$PortName = "IP_$PrinterHostAddress"
-    [string]$DriverName = 'HP Universal Printing PCL 6'
-    [string]$Location = '167 College, 2nd Floor'
-    [string]$PortNumber = '9100'
-    [string]$InfPath = "$dirFiles\hpcu196u.inf"
-    [string]$Comment = 'HP LaserJet M401n'
-		
     If ($deploymentType -ine 'Uninstall') {
         ##*===============================================
         ##* PRE-INSTALLATION
