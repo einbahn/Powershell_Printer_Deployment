@@ -6,50 +6,64 @@
 #requires -module PrintManagement
 #requires -version 3
 
-function Install-IPPrinter {
-    [cmdletbinding()]
-    param(
-        [string]$PrinterName,
-        [string]$PrinterHostAddress,
-        [string]$PortName = "IP_$PrinterHostAddress",
-        [string]$DriverName,
-        [string]$Location,
-        [string]$PortNumber = '9100',
-        [string]$InfPath,
-        [string]$Comment
-    )
-    function AddIPPort { 
-        Add-PrinterPort -name $PortName -PrinterHostAddress $PrinterHostAddress -PortNumber $PortNumber -verbose 
-    }
+#Variables
+[string]$PrinterName
+[string]$PrinterHostAddress
+[string]$PortName = "IP_$PrinterHostAddress"
+[string]$DriverName
+[string]$Location
+[string]$PortNumber = '9100'
+[string]$InfPath
+[string]$Comment
 
-    function AddIPPrinter {
-        Add-Printer -name $PrinterName -DriverName $DriverName -Location `
-            $Location -PortName $PortName -Comment $Comment -verbose 
-    }
+#import driver into the driver store
+if (-not (Get-PrinterDriver -Name $DriverName -ErrorAction silentlycontinue)) {
+    start-process -FilePath (resolve-path $env:windir\winsxs\amd64_microsoft-windows-pnputil_* | join-path -ChildPath "pnputil.exe") `
+        -ArgumentList "/add-driver $infpath" -WindowStyle 'Hidden' -Wait -ErrorAction Stop
+    Add-PrinterDriver -name $DriverName -verbose
+} 
 
-    function SetIPPrinter {
-        Set-Printer -Name $PrinterName -PortName $PortName -Location $Location -DriverName $DriverName -comment $comment -verbose 
+#function declarations
+function PrinterAlreadyExists {
+    if (Get-Printer -Name $PrinterName -ErrorAction SilentlyContinue) {
+        return $true
     }
-
-    #import driver into the driver store
-    if (Get-PrinterDriver -Name $DriverName) {
-        Write-Verbose  "Driver `"$DriverName`" already exists in the driver store." -Verbose
+    else { return $false}
+}
+function PortAlreadyExists {
+    if (Get-PrinterPort -Name $PortName -ErrorAction SilentlyContinue) {
+        return $true
     }
-    else {
-        $PnPUtilPath = resolve-path c:\windows\winsxs\amd64_microsoft-windows-pnputil_*\ | join-path -childpath pnputil.exe
-        Start-Process -FilePath $PnPUtilPath -ArgumentList "/add-driver $InfPath" -wait -nonewwindow
-        Add-PrinterDriver -name $DriverName -verbose
-    } 
+    else {return $false}
+}
+function AddIPPort { 
+    Add-PrinterPort -name $PortName -PrinterHostAddress $PrinterHostAddress -PortNumber $PortNumber -verbose 
+}
 
-    if (get-printer -name $printername) {
-        write-verbose "Target printer already exists - updating printer settings..." -verbose
-        AddIPPort
+function AddIPPrinter {
+    Add-Printer -name $PrinterName -DriverName $DriverName -Location $Location -PortName $PortName -Comment $Comment -verbose 
+}
+function SetIPPrinter {
+    Set-Printer -Name $PrinterName -PortName $PortName -Location $Location -DriverName $DriverName -comment $comment -verbose 
+}
+
+#Install main
+if (PrinterAlreadyExists) {
+    if (PortAlreadyExists) {
         SetIPPrinter
     }
     else {
-        write-verbose "Installing Printer..." -verbose
         AddIPPort
-        AddIPPrinter
+        SetIPPrinter
+    } 
+}
+else {
+    if (PortAlreadyExists) {
+        AddIPPrinter 
+    }
+    else {
+        AddIPPort
+        AddIPPrinter 
     }
 }
-
+    
