@@ -17,34 +17,28 @@ Input printer installation parameters below, retaining all quotations marks as i
 The $PSScriptRoot automatic variable expands to the path of the install script itself. The driver folder and .inf file is relative to this value. 
 #>
 
-#set up logging
-$ErrorActionPreference='SilentlyContinue'
-Stop-Transcript | Out-Null
-$ErrorActionPreference='Continue'
-Start-Transcript -path "$env:systemdrive\temp\printer_installs.log" -append
-
 #Define Variables
 
 [hashtable]$installparms = 
 
     @{
-    PrinterName         = 'ITS_Ricoh_MPC_3002_1 (UTORcsi)'
+    PrinterName         = ''
 
-    PrinterHostAddress  = '142.1.209.215'
+    PrinterHostAddress  = ''
 
-    DriverName          = 'RICOH Aficio MP C3002 PCL 6'
+    DriverName          = ''
 
-    Location            = '246 Bloor, 6th Floor'
+    Location            = ''
 
-    InfPath             = "$PSScriptRoot\PCL6-WIN7x64\OEMSETUP.inf"
+    InfPath             = "$PSScriptRoot"
 
-    Comment             = 'Ricoh Printer in Kitchen'
+    Comment             = ''
 
     }
 
 #dot-source the printer install function
 
-. '\\forum1\dsl$\printers\Powershell_Printer_Deployment\Install-IPPrinter.ps1'
+. ..\bin\Install-IPPrinter.ps1
 
 #call printer install function
 Install-IPPrinter @installparms
