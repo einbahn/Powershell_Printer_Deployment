@@ -27,12 +27,14 @@ if (-not (Get-PrinterDriver -Name $DriverName -ErrorAction silentlycontinue)) {
 #function declarations
 function PrinterAlreadyExists {
     if (Get-Printer -Name $PrinterName -ErrorAction SilentlyContinue) {
+        Write-Verbose -Message "Destination printer $($printername) already exists." -Verbose
         return $true
     }
     else { return $false}
 }
 function PortAlreadyExists {
     if (Get-PrinterPort -Name $PortName -ErrorAction SilentlyContinue) {
+        write-verbose "Destination port $($portname) already exists." -Verbose
         return $true
     }
     else {return $false}
