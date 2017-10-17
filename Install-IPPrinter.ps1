@@ -19,8 +19,8 @@
 #import driver into the driver store
 if (-not (Get-PrinterDriver -Name $DriverName -ErrorAction silentlycontinue)) {
     start-process -FilePath (resolve-path $env:windir\winsxs\amd64_microsoft-windows-pnputil_* | join-path -ChildPath "pnputil.exe") `
-        -ArgumentList "/add-driver $infpath" -WindowStyle 'Hidden' -Wait -ErrorAction Stop
-    Add-PrinterDriver -name $DriverName -verbose
+        -ArgumentList "/add-driver $infpath" -WindowStyle 'Hidden' -Wait
+    Add-PrinterDriver -name $DriverName -verbose -ErrorAction Stop
 } 
 
 #function declarations
