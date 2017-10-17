@@ -36,12 +36,6 @@ The $PSScriptRoot automatic variable expands to the path of the install script i
 
     }
 
-#dot-source the printer install function
+#call the printer install script with parameter splatting
 
-. ..\bin\Install-IPPrinter.ps1
-
-#call printer install function
-Install-IPPrinter @installparms
-
-#stop logging
-Stop-Transcript
+& ..\bin\Install-IPPrinter.ps1 @installparms

@@ -7,15 +7,16 @@
 #requires -version 3
 
 #Variables
-[string]$PrinterName
-[string]$PrinterHostAddress
-[string]$PortName = "IP_$PrinterHostAddress"
-[string]$DriverName
-[string]$Location
-[string]$PortNumber = '9100'
-[string]$InfPath
+param(
+[string]$PrinterName,
+[string]$PrinterHostAddress,
+[string]$PortName = "IP_$PrinterHostAddress",
+[string]$DriverName,
+[string]$Location,
+[string]$PortNumber = '9100',
+[string]$InfPath,
 [string]$Comment
-
+)
 #import driver into the driver store
 if (-not (Get-PrinterDriver -Name $DriverName -ErrorAction silentlycontinue)) {
     start-process -FilePath (resolve-path $env:windir\winsxs\amd64_microsoft-windows-pnputil_* | join-path -ChildPath "pnputil.exe") `
