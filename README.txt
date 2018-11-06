@@ -2,8 +2,8 @@ How to deploy a printer via PowerShell
 
 The printer deployment uses two scripts. They are 
 
-1) \\forum1\dsl$\printers\Powershell Printer Deployment\Install-IPPrinter.ps1
-2) \\forum1\dsl$\printers\Powershell Printer Deloyment\Install-Win10x64.ps1
+1) Install-IPPrinter.ps1
+2) Install-Win10x64.ps1
 
 Script 1 contains the logic and functions and Script 2 the parameters. Script 2 dot-sources Script 1.
 Never edit Script 1 directly - always only work with Script 2. 
@@ -11,13 +11,13 @@ Never edit Script 1 directly - always only work with Script 2.
 Steps:
 1. Download / extract the printer driver for Windows 10.
 
-2. Create the printer folder and the driver folder as usual (see \\forum1\dsl$\printers\Printer Naming Conventions.txt)
+2. Create the printer folder and the driver folder as usual (see Printer Naming Conventions.txt)
 
 3. copy Script 2 (Install-Win10x64.ps1) into the printer folder. 
 
 4. Edit Script 2 and fill out the following parameters. Retain the quotes.
 
-    PrinterName     	= "Printer Name (UTORcsi)";
+    PrinterName     	= "Printer Name";
     PrinterHostAddress  = "Printer IP";
     DriverName          = "Driver Name";
     Location            = "Printer Location";
@@ -27,7 +27,7 @@ Note: $PSScriptRoot is an automatic variable that references the script root, i.
 
 To deploy this script with SCCM:
 
-commandline: powershell.exe -nologo -noninteractive -executionpolicy bypass -file \\forum1\dsl$\printers\its_ricoh_mpc3002_1\Install-Win10x64.ps1
+commandline: powershell.exe -nologo -noninteractive -executionpolicy bypass -file .\Install-Win10x64.ps1
 only runs on Windows 10 64 bit
 Whether or not a user is logged on 
 
