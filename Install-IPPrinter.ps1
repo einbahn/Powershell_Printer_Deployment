@@ -23,22 +23,6 @@ if (-not (Get-PrinterDriver -Name $DriverName -ErrorAction silentlycontinue)) {
         -ArgumentList "/add-driver $infpath" -WindowStyle 'Hidden' -Wait
     Add-PrinterDriver -name $DriverName -verbose -ErrorAction Stop
 } 
-
-#function declarations
-function PrinterAlreadyExists {
-    if (Get-Printer -Name $PrinterName -ErrorAction SilentlyContinue) {
-        Write-Verbose -Message "Destination printer $($printername) already exists." -Verbose
-        return $true
-    }
-    else { return $false}
-}
-function PortAlreadyExists {
-    if (Get-PrinterPort -Name $PortName -ErrorAction SilentlyContinue) {
-        write-verbose "Destination port $($portname) already exists." -Verbose
-        return $true
-    }
-    else {return $false}
-}
 function AddIPPort { 
     Add-PrinterPort -name $PortName -PrinterHostAddress $PrinterHostAddress -PortNumber $PortNumber -verbose 
 }
@@ -50,23 +34,15 @@ function SetIPPrinter {
     Set-Printer -Name $PrinterName -PortName $PortName -Location $Location -DriverName $DriverName -comment $comment -verbose 
 }
 
+$Printer = Get-Printer -Name $Name -ErrorAction SilentlyContinue
+
+$Port = Get-PrinterPort -Name $PortName -ErrorAction SilentlyContinue
+
 #Install main
-if (PrinterAlreadyExists) {
-    if (PortAlreadyExists) {
-        SetIPPrinter
-    }
-    else {
-        AddIPPort
-        SetIPPrinter
-    } 
-}
-else {
-    if (PortAlreadyExists) {
-        AddIPPrinter 
-    }
-    else {
-        AddIPPort
-        AddIPPrinter 
-    }
+switch ($true) {
+    {$Printer -and $Port} {SetIPPrinter; break}
+    {$Printer -and -not $Port} {AddIPPort; SetIPPrinter; break}
+    {$Port -and -not $Printer} {AddIPPrinter; break}
+    default {AddIPPort; AddIPPrinter; break}
 }
     
